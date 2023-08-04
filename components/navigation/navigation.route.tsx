@@ -9,11 +9,16 @@ import Image from 'next/image';
 import { Badge } from '@mui/material';
 import {AiFillBell} from 'react-icons/ai'
 import {IoMdSettings} from 'react-icons/io'
+import {LuLogOut} from 'react-icons/lu'
+import { signOut, useSession } from 'next-auth/react';
 
 
 const NavbarRoute:React.FC=()=>{
     const [darkmode,setDarkmode]=useState<string|null>(localStorage.getItem('darkmode'));
     const [authentication,setAuthentication]=useState<string|null>(localStorage.getItem('authPageSwitch'));
+    const {data,status}=useSession();
+    const isAuth=status==="authenticated";
+    
 
     useEffect(()=>{
         setDarkmode(localStorage.getItem('darkmode'));
@@ -39,9 +44,9 @@ const NavbarRoute:React.FC=()=>{
 
     const user:boolean=true;
     return(
-        <nav className="flex w-full h-full items-center px-16 py-12" >
-            {user?(
-                <>
+        !isAuth?(
+            <>
+                <nav className="flex w-full h-full items-center px-16 py-12" >
                     <div className="flex-1  flex justify-start items-center text-center">
                         <label className="pr-2 text-3xl">VividChat</label>
                         <label className='pr-5 text-4xl'><FcVideoCall/></label>
@@ -64,28 +69,31 @@ const NavbarRoute:React.FC=()=>{
                             <button className="pr-5 text-2xl font-black" onClick={handleSunmode}><FiSun/></button>
                         )}
                     </div>
-                </>
-            ):(
+                    </nav>
+                    </>
+                ):(
                 <>
+                <nav className="flex w-full h-full items-center px-16 py-12 " >
                     <div className='flex-1 flex justify-stars'>
                         <label className="pr-2 text-3xl">VividChat</label>
                         <label className='pr-5 text-4xl'><FcVideoCall/></label>
                     </div>
                     <div className='flex-1 justify-end flex text-2xl text-center items-center'>
-                        <span className='pr-5 transform hover:rotate-[360deg] duration-1000'><IoMdSettings/></span>
+                        <span className='pr-5'><IoMdSettings/></span>
                         <button type='button' className='pr-5'>
                             <Badge badgeContent={4} color="primary"><AiFillBell/></Badge>
                         </button>
                         <span  className='pr-5'><Image src={AvatarDeneme} alt='avatar-image' width={48} height={36} className='border-2 border-black rounded-full'/></span>
+                        <button className='pr-5' onClick={()=>signOut()}><LuLogOut/></button>
                         {darkmode==="true"?(
                             <button className="pr-5 text-2xl font-black" onClick={handleDarkmode}><HiOutlineMoon/></button>
                         ):(
                             <button className="pr-5 text-2xl font-black" onClick={handleSunmode}><FiSun/></button>
                         )}
                     </div>
+                </nav>
                 </>
-            )}
-        </nav>
+            )
     )
 }
 

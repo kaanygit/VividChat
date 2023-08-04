@@ -1,7 +1,4 @@
 
-
-
-
 const LoadingHome:React.FC=()=>{
     return(
         <main className="flex h-full items-center justify-center px-24 py-36 w-full">
