@@ -1,12 +1,14 @@
 "use client"
-import { Button, Input } from '@mui/material';
+import { Button } from '@mui/material';
 import { useState } from 'react';
 import {AiOutlineEye,AiOutlineEyeInvisible} from 'react-icons/ai'
 import {GrCircleInformation} from 'react-icons/gr'
 import {FcGoogle} from 'react-icons/fc'
 import {ImGithub} from 'react-icons/im'
 import {BsFacebook} from 'react-icons/bs'
-
+import {signIn} from 'next-auth/react'
+import {useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 interface initialFormValue{
     email:string;
@@ -20,6 +22,7 @@ const initialForm:initialFormValue={
 const LoginScreen=()=>{
     const [showPassword,setShowPassword]=useState<boolean>(false);
     const [formValue,setFormValue]=useState<initialFormValue>(initialForm);
+    const router=useRouter();
 
     const resetFormValue=()=>setFormValue(initialForm);
     const {email,password}=formValue;
@@ -29,8 +32,14 @@ const LoginScreen=()=>{
         setFormValue({...formValue,[name]:value});
     }
 
-    const handleForm=(e:React.ChangeEvent<HTMLFormElement>)=>{
+    const handleForm=async (e:React.ChangeEvent<HTMLFormElement>)=>{
         e.preventDefault();
+        const res=await signIn("credentials",{
+            email,password
+        });
+        if(res?.error)return console.log(res.error);
+        router.replace("/profile");
+
         console.log(formValue);
         resetFormValue();
     };

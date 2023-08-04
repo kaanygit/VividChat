@@ -1,7 +1,8 @@
-import { NavbarRoute } from '@/components/export'
-import './globals.css'
 import type { Metadata } from 'next'
 import { Rubik } from 'next/font/google'
+import './globals.css'
+import { NavbarRoute } from '@/components/export'
+import AuthProvider from '@/components/auth-provider/AuthProvider'
 
 const rubikFont = Rubik({ 
   weight:'500',
@@ -13,17 +14,22 @@ export const metadata: Metadata = {
   description: 'Video Chat Application',
 }
 
-export default function RootLayout({
+export default  function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={rubikFont.className}>
-        <NavbarRoute/>
-        {children}
-      </body>
-    </html>
+    <AuthProvider>
+      <html lang="en">
+        <body className={rubikFont.className}>
+          <NavbarRoute/>
+          {children}
+        </body>
+      </html>
+    </AuthProvider>
   )
+
 }
+
+

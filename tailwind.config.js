@@ -17,6 +17,11 @@ module.exports = {
         "blue-1":"#5e77f4",
         "blue-2":"#4460f3",
         "typography-text":"#c4c7c5",
+        "dark-1":"#000000",
+        "dark-2":"#141414",
+        "dark-3":"#282828",
+        "dark-4":"#230046",
+        "dark-5":"#320064",
       }
     },
   },

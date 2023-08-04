@@ -6,6 +6,7 @@ import {FcGoogle} from 'react-icons/fc'
 import {ImGithub} from 'react-icons/im'
 import {BsFacebook} from 'react-icons/bs'
 import { ToastContainer, toast } from 'react-toastify';
+import { POST } from "@/app/api/auth/users/route";
 
 
 interface initialValueTS{
@@ -37,13 +38,29 @@ const RegisterScreen=()=>{
         setFormValue({...formValue,[name]:value});
     };
     
-    const handleFormSubmit=(e:React.ChangeEvent<HTMLFormElement>)=>{
+    const handleFormSubmit=async (e:React.ChangeEvent<HTMLFormElement>)=>{
         e.preventDefault();
         if(confirmPassword!==password){
             toast.error("Passwords not equal");
             return;
         }else{
-            console.log(formValue);
+            try {
+                console.log(formValue);
+                const res=await fetch("/api/auth/users",{
+                    method:"POST",
+                    body:JSON.stringify(formValue),
+                })
+                if(res.status==423){
+                    toast.error("Username in already in use");
+                }else if(res.status==422){
+                    toast.error("Email in already in use");
+                }else{
+                    const data=await res.json();
+                    console.log(data);
+                }
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
