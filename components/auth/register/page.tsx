@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {GrCircleInformation} from 'react-icons/gr'
 import {AiOutlineEye,AiOutlineEyeInvisible} from 'react-icons/ai'
 import {FcGoogle} from 'react-icons/fc'
@@ -27,6 +27,9 @@ const RegisterScreen=()=>{
     const [formValue,setFormValue]=useState<initialValueTS>(initialValue);
     const [showPassword,setShowPassword]=useState<boolean>(false);
 
+    const [waitLogin,setWaitLogin]=useState(false);
+    const buttonWait=useRef<HTMLButtonElement|null>(null);
+
     const resetFormValue=()=>setFormValue(initialValue);
     const {username,email,password,confirmPassword}=formValue;
 
@@ -40,8 +43,10 @@ const RegisterScreen=()=>{
     
     const handleFormSubmit=async (e:React.ChangeEvent<HTMLFormElement>)=>{
         e.preventDefault();
+        setWaitLogin(true);
         if(confirmPassword!==password){
             toast.error("Passwords not equal");
+            setWaitLogin(false);
             return;
         }else{
             try {
@@ -58,11 +63,24 @@ const RegisterScreen=()=>{
                     const data=await res.json();
                     console.log(data);
                 }
+                setWaitLogin(true);
             } catch (error) {
                 console.error(error);
+                setWaitLogin(false);
             }
         }
+        setWaitLogin(false);
     };
+    useEffect(()=>{
+        if(waitLogin){
+            buttonWait.current?.setAttribute('disabled','true');
+            buttonWait.current?.classList.add('bg-blue-400')
+        }else{
+            buttonWait.current?.classList.remove('bg-blue-400');
+            buttonWait.current?.removeAttribute('disabled');
+        }
+        
+    }, [waitLogin]);
 
     return(
         <>
@@ -84,7 +102,7 @@ const RegisterScreen=()=>{
                     <p className='text-gray-400 flex flex-row'><GrCircleInformation/>Use at least 8 characters, one uppercase, one lowercase and one number.</p>
                 </div>
                 <div className='pt-5'>
-                    <button className='w-3/4 bg-blue-2 p-2 rounded-xl text-white' type='submit' >Register</button>
+                    <button className='w-3/4 bg-blue-2 p-2 rounded-xl text-white' type='submit' ref={buttonWait}>Register</button>
                 </div>
             </form>
             <div className='text-sm pt-3'>

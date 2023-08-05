@@ -4,25 +4,29 @@ import { useEffect, useState } from 'react'
 import {FiSun} from 'react-icons/fi'
 import {FcVideoCall} from 'react-icons/fc'
 import {HiOutlineMoon} from 'react-icons/hi'
-import AvatarDeneme from '../../assets/deneme-avatar.jpg';
+import AvatarDeneme from '../../assets/user_reset_png.png';
 import Image from 'next/image';
 import { Badge } from '@mui/material';
 import {AiFillBell} from 'react-icons/ai'
 import {IoMdSettings} from 'react-icons/io'
 import {LuLogOut} from 'react-icons/lu'
 import { signOut, useSession } from 'next-auth/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { homeAuthGlobalActionFalse, homeAuthGlobalActionTrue } from '@/redux/homeAuth/homeAuth.action';
+import RootState from '@/redux/root-reducer';
 
 
 const NavbarRoute:React.FC=()=>{
     const [darkmode,setDarkmode]=useState<string|null>(localStorage.getItem('darkmode'));
-    const [authentication,setAuthentication]=useState<string|null>(localStorage.getItem('authPageSwitch'));
-    const {data,status}=useSession();
+    const authentication=useSelector((state:RootState)=>state.homeAuth.homeAuth);
+    const dispatch=useDispatch();
+
+    const {data:session,status}=useSession();
     const isAuth=status==="authenticated";
     
 
     useEffect(()=>{
         setDarkmode(localStorage.getItem('darkmode'));
-        setAuthentication(localStorage.getItem('authPageSwitch'));
     },[])
 
     const handleDarkmode=()=>{
@@ -34,19 +38,18 @@ const NavbarRoute:React.FC=()=>{
         setDarkmode('true');
     }
     const handleAuth=()=>{
-        localStorage.setItem('authPageSwitch','false');
-        setAuthentication('false');
+        dispatch(homeAuthGlobalActionTrue())
     }
     const handleAuthReverse=()=>{
-        localStorage.setItem('authPageSwitch','true');
-        setAuthentication('true');
+        dispatch(homeAuthGlobalActionFalse());
+        console.log(authentication);
     }
 
     const user:boolean=true;
     return(
-        !isAuth?(
+        !session?(
             <>
-                <nav className="flex w-full h-full items-center px-16 py-12" >
+                <nav className="flex w-full h-full items-center px-16 py-12 " >
                     <div className="flex-1  flex justify-start items-center text-center">
                         <label className="pr-2 text-3xl">VividChat</label>
                         <label className='pr-5 text-4xl'><FcVideoCall/></label>
@@ -57,7 +60,7 @@ const NavbarRoute:React.FC=()=>{
                     <div className="flex-1 flex justify-end items-center text-center">
                         <label className="pr-5 text-xl">English</label>
                         <div className='pr-5'>
-                        {authentication==="true"?(
+                        {authentication?(
                             <button className=" text-xl bg-white shadow-2xl rounded-2xl px-3 py-2 text-blue-1" onClick={handleAuth}>Login</button>   
                             ):(
                             <button className=" text-xl bg-white shadow-2xl rounded-2xl px-3 py-2 text-blue-1" onClick={handleAuthReverse}>Register</button>
