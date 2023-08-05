@@ -1,0 +1,5 @@
+export enum HOME_AUTH_TYPES{
+    HOME_AUTH="HOME_AUTH",
+    SET_FALSE="SET_FALSE",
+    SET_TRUE="SET_TRUE"
+}

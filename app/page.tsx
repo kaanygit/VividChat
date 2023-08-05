@@ -2,26 +2,45 @@
 import React, { useEffect, useRef } from "react"
 import Image from 'next/image'
 import Character from '../assets/home-page-character.png'
-import { Authentication, LoginScreen } from '@/components/export'
+import { Authentication} from '@/components/export'
 import { Transition } from '@headlessui/react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {FcVideoCall} from 'react-icons/fc'
-import {BsCameraVideo, BsFillKeyFill, BsSearch} from 'react-icons/bs';
-import denemeAvatar from '../assets/deneme-avatar.jpg'
-import { getServerSession } from "next-auth"
+import {BsCameraVideo} from 'react-icons/bs';
 import { BiKey } from "react-icons/bi"
 import { CiCamera } from "react-icons/ci"
 import { useSession } from "next-auth/react"
-import { Stream } from "stream"
 
+interface chatKeyTS{
+  chatKey:string;
+}
+const initialKey:chatKeyTS={
+  chatKey:""
+}
 
 export default  function Home() {
   const [showPageTransition,setShowPageTransition]=React.useState<boolean>(false);
   const [showCam,setShowCam]=React.useState<boolean>(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const localvideoRef = useRef<HTMLVideoElement>(null);
+  const remoteLocalRef=useRef<HTMLVideoElement>(null);
+  const socketRef=useRef(null);
 
-  const {data:session,status}= useSession();
+
+
+  
+  const [chatsKey,setChatsKey]=React.useState<chatKeyTS>(initialKey);
+  const {chatKey} =chatsKey;
+  const handleChance=(e:React.ChangeEvent<HTMLInputElement>)=>{
+    const {name,value}=e.target;
+    setChatsKey({...chatsKey,[name]:value});
+  };
+  const handleJoinRoom=(e:React.ChangeEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    console.log(chatsKey);
+  }
+
+
+  const {data:session,status}=useSession();
   React.useEffect(()=>{
     setShowPageTransition(true);
   },[])
@@ -31,10 +50,10 @@ export default  function Home() {
       audio: true,
       video: {
         width: 1280,
-        height: 720,
+        height: 650,
       },
     };
-    if(videoRef.current){
+    if(localvideoRef.current){
       const playCamVideo = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia(constantVideo);
@@ -46,8 +65,8 @@ export default  function Home() {
       };
   
       const successVideoPlayCam = (stream: MediaStream) => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+        if (localvideoRef.current) {
+          localvideoRef.current.srcObject = stream;
         }
       };
   
@@ -59,7 +78,6 @@ export default  function Home() {
 
     }
   };
-  console.log(videoRef.current);
 
   return (
     <Transition show={showPageTransition} enter='transition-opacity duration-1000' enterFrom='opacity-0' enterTo='opacity-100'>
@@ -81,12 +99,16 @@ export default  function Home() {
           <div className="flex-1 w-full h-full p-16 justify-center items-center text-center ">
             <div className="flex pb-5">
               <span className="flex-1 flex justify-center items-center"><span className="pr-4">Create Room </span><BsCameraVideo/></span>
-              <span className="flex-1 flex justify-center items-center relative"><input className="w-3/4 flex pr-12 " /><BiKey className="top-1 bottom-0  right-14 absolute justify-center items-center text-center"/></span>
+              <form onSubmit={handleJoinRoom}>
+                <span className="flex-1 flex justify-center items-center relative"><input className="w-3/4 flex pr-12 " type="text" value={chatKey} name="chatKey" onChange={handleChance}/><BiKey className="top-1 bottom-0  right-14 absolute justify-center items-center text-center"/></span>
+                <button type="submit">join</button>
+              </form>
+              
               <span className="flex-1 flex justify-center items-center" onClick={handleCamera}><span className="pr-4">{!showCam?"Open":"Close"} Camera</span><CiCamera/></span>
             </div>
-            <div >
-              <video className="bg-gray-300  justify-center items-center  text-center flex w-full " width={1000} height={500} autoPlay playsInline ref={videoRef}></video>
-
+            <div className="pb-10 grid grid-cols-2 gap-5">
+              <video className="bg-gray-300 justify-center items-center  text-center flex w-full " width={1280} height={400} autoPlay playsInline ref={localvideoRef}></video>
+              <video className="bg-gray-300 justify-center items-center  text-center flex w-full " width={1280} height={400} autoPlay playsInline ref={remoteLocalRef}></video>
             </div>
           </div>
         </main>

@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {AiOutlineEye,AiOutlineEyeInvisible} from 'react-icons/ai'
 import {GrCircleInformation} from 'react-icons/gr'
 import {FcGoogle} from 'react-icons/fc'
@@ -24,6 +24,9 @@ const LoginScreen=()=>{
     const [formValue,setFormValue]=useState<initialFormValue>(initialForm);
     const router=useRouter();
 
+    const [waitLogin,setWaitLogin]=useState(false);
+    const buttonWait=useRef<HTMLButtonElement|null>(null);
+
     const resetFormValue=()=>setFormValue(initialForm);
     const {email,password}=formValue;
 
@@ -34,18 +37,34 @@ const LoginScreen=()=>{
 
     const handleForm=async (e:React.ChangeEvent<HTMLFormElement>)=>{
         e.preventDefault();
+        setWaitLogin(true);
         const res=await signIn("credentials",{
             email,password
         });
-        if(res?.error)return console.log(res.error);
+        await setWaitLogin(false);
+        if(res?.error){
+            setWaitLogin(false);
+            return console.log(res.error);
+        }
         router.replace("/profile");
-
         console.log(formValue);
         resetFormValue();
+        setWaitLogin(false);
     };
     const handleShowPassword=()=>{
         setShowPassword(!showPassword);
     }
+
+    useEffect(()=>{
+        if(waitLogin){
+            buttonWait.current?.setAttribute('disabled','true');
+            buttonWait.current?.classList.add('bg-blue-400')
+        }else{
+            buttonWait.current?.classList.remove('bg-blue-400');
+            buttonWait.current?.removeAttribute('disabled');
+        }
+        
+    }, [waitLogin]);
 
     return(
         <>
@@ -58,7 +77,7 @@ const LoginScreen=()=>{
                     <button type='button'  className='asdas absolute right-2 top-0.5 transform -translate-x-14 translate-y-5 text-xl z-10  p-2' onClick={handleShowPassword}>{!showPassword?<AiOutlineEye/>:<AiOutlineEyeInvisible/>}</button>
                 </div>
                 <div className='pt-5'>
-                    <button className='w-3/4 bg-blue-2 p-2 rounded-xl text-white' type='submit' >Login</button>
+                    <button ref={buttonWait} className='w-3/4 bg-blue-2 p-2 rounded-xl text-white' type='submit' >Login</button>
                 </div>
             </form>
             <div className='text-sm pt-3'>
